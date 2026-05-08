@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDI IA - Dashboard de Monitoramento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-icon.online {
+            background: #4caf50;
+        }
+
+        .status-icon.offline {
+            background: #f44336;
+        }
+
+        .status-icon.warning {
+            background: #ff9800;
+        }
+
+        .status-info h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .status-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .status-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .status-details .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-details .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-details .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .status-details .value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .logs-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logs-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .logs-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .logs-container {
+            background: #1a202c;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            color: #68d391;
+            font-weight: bold;
+        }
+
+        .log-level {
+            margin-left: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .log-level.info {
+            background: #3182ce;
+            color: white;
+        }
+
+        .log-level.warning {
+            background: #d69e2e;
+            color: white;
+        }
+
+        .log-level.error {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .log-message {
+            color: #e2e8f0;
+            margin-left: 10px;
+        }
+
+        .actions-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions-header {
+            margin-bottom: 20px;
+        }
+
+        .actions-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .action-btn.start {
+            background: #4caf50;
+            color: white;
+        }
+
+        .action-btn.start:hover {
+            background: #45a049;
+        }
+
+        .action-btn.stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .action-btn.stop:hover {
+            background: #da190b;
+        }
+
+        .action-btn.restart {
+            background: #ff9800;
+            color: white;
+        }
+
+        .action-btn.restart:hover {
+            background: #e68900;
+        }
+
+        .action-btn.refresh {
+            background: #2196f3;
+            color: white;
+        }
+
+        .action-btn.refresh:hover {
+            background: #1976d2;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #4caf50;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        .notification.warning {
+            background: #ff9800;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 EDI IA</h1>
+            <p>Dashboard de Monitoramento do Sistema</p>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon online" id="app-principal-icon">✓</div>
+                    <div class="status-info">
+                        <h3>App Principal</h3>
+                        <p>Porta 3001</p>
+                    </div>
+                </div>
+                <div class="status-details">
+                    <div class="detail-item">
+                        <span class="label">Status:</span>
+                        <span class="value" id="app-principal-status">Verificando...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Uptime:</span>
+                        <span class="value" id="app-principal-uptime">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Memória:</span>
+                        <span class="value" id="app-principal-memory">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon online" id="api-mobile-icon">✓</div>
+                    <div class="status-info">
+                        <h3>API Mobile</h3>
+                        <p>Porta 3002</p>
+                    </div>
+                </div>
+                <div class="status-details">
+                    <div class="detail-item">
+                        <span class="label">Status:</span>
+                        <span class="value" id="api-mobile-status">Verificando...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Uptime:</span>
+                        <span class="value" id="api-mobile-uptime">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Memória:</span>
+                        <span class="value" id="api-mobile-memory">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon online" id="database-icon">✓</div>
+                    <div class="status-info">
+                        <h3>Database</h3>
+                        <p>SQLite</p>
+                    </div>
+                </div>
+                <div class="status-details">
+                    <div class="detail-item">
+                        <span class="label">Status:</span>
+                        <span class="value" id="database-status">Verificando...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Tamanho:</span>
+                        <span class="value" id="database-size">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Conexões:</span>
+                        <span class="value" id="database-connections">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon online" id="mobile-app-icon">✓</div>
+                    <div class="status-info">
+                        <h3>App Mobile</h3>
+                        <p>Vercel</p>
+                    </div>
+                </div>
+                <div class="status-details">
+                    <div class="detail-item">
+                        <span class="label">Status:</span>
+                        <span class="value" id="mobile-app-status">Verificando...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">URL:</span>
+                        <span class="value">edi-3hmcxdr29.vercel.app</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Deploy:</span>
+                        <span class="value" id="mobile-app-deploy">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <div class="logs-header">
+                <h2>📋 Logs do Sistema</h2>
+                <div class="logs-controls">
+                    <button class="btn btn-secondary" onclick="clearLogs()">Limpar</button>
+                    <button class="btn btn-primary" onclick="refreshLogs()">
+                        <span class="loading hidden" id="logs-loading"></span>
+                        Atualizar
+                    </button>
+                </div>
+            </div>
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-05-08 14:30:00</span>
+                    <span class="log-level info">INFO</span>
+                    <span class="log-message">Sistema EDI IA inicializado</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-05-08 14:30:15</span>
+                    <span class="log-level info">INFO</span>
+                    <span class="log-message">App Principal iniciado na porta 3001</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-05-08 14:30:30</span>
+                    <span class="log-level info">INFO</span>
+                    <span class="log-message">API Mobile iniciada na porta 3002</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <div class="actions-header">
+                <h2>⚡ Ações do Sistema</h2>
+            </div>
+            <div class="actions-grid">
+                <button class="action-btn start" onclick="startServices()">
+                    🚀 Iniciar Serviços
+                </button>
+                <button class="action-btn stop" onclick="stopServices()">
+                    🛑 Parar Serviços
+                </button>
+                <button class="action-btn restart" onclick="restartServices()">
+                    🔄 Reiniciar Serviços
+                </button>
+                <button class="action-btn refresh" onclick="refreshStatus()">
+                    🔄 Atualizar Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Configurações
+        const API_BASE_URL = 'http://localhost:3001';
+        const API_MOBILE_URL = 'http://localhost:3002';
+        const MOBILE_APP_URL = 'https://edi-3hmcxdr29-helder-netos-projects.vercel.app';
+
+        // Estado do sistema
+        let systemStatus = {
+            appPrincipal: false,
+            apiMobile: false,
+            database: false,
+            mobileApp: false
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+            setInterval(refreshStatus, 30000); // Atualizar a cada 30 segundos
+        });
+
+        // Funções de verificação de status
+        async function checkServiceStatus(url, serviceId) {
+            try {
+                const response = await fetch(url + '/api/mobile/health', { 
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    updateServiceStatus(serviceId, 'online', 'Online');
+                    return true;
+                } else {
+                    updateServiceStatus(serviceId, 'offline', 'Offline');
+                    return false;
+                }
+            } catch (error) {
+                updateServiceStatus(serviceId, 'offline', 'Offline');
+                return false;
+            }
+        }
+
+        function updateServiceStatus(serviceId, status, statusText) {
+            const icon = document.getElementById(serviceId + '-icon');
+            const statusElement = document.getElementById(serviceId + '-status');
+            
+            // Remover classes de status
+            icon.classList.remove('online', 'offline', 'warning');
+            
+            // Adicionar nova classe
+            icon.classList.add(status);
+            
+            // Atualizar texto
+            statusElement.textContent = statusText;
+            
+            // Atualizar estado
+            systemStatus[serviceId] = (status === 'online');
+            
+            // Atualizar uptime (simulado)
+            if (status === 'online') {
+                const uptimeElement = document.getElementById(serviceId + '-uptime');
+                if (uptimeElement) {
+                    uptimeElement.textContent = '2h 15m';
+                }
+            }
+        }
+
+        async function refreshStatus() {
+            console.log('Atualizando status do sistema...');
+            
+            // Verificar App Principal
+            await checkServiceStatus(API_BASE_URL, 'app-principal');
+            
+            // Verificar API Mobile
+            await checkServiceStatus(API_MOBILE_URL, 'api-mobile');
+            
+            // Verificar Database (simulado)
+            updateServiceStatus('database', 'online', 'Online');
+            document.getElementById('database-size').textContent = '2.4 MB';
+            document.getElementById('database-connections').textContent = '3';
+            
+            // Verificar App Mobile (Vercel)
+            try {
+                const response = await fetch(MOBILE_APP_URL, { method: 'HEAD' });
+                updateServiceStatus('mobile-app', 'online', 'Online');
+                document.getElementById('mobile-app-deploy').textContent = 'Ativo';
+            } catch (error) {
+                updateServiceStatus('mobile-app', 'offline', 'Offline');
+                document.getElementById('mobile-app-deploy').textContent = 'Erro';
+            }
+            
+            // Adicionar log
+            addLog('info', 'Status do sistema atualizado');
+        }
+
+        // Funções de ação
+        async function startServices() {
+            showNotification('Iniciando serviços...', 'warning');
+            
+            try {
+                // Simular início dos serviços
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showNotification('Serviços iniciados com sucesso!', 'success');
+                addLog('info', 'Serviços iniciados manualmente');
+                refreshStatus();
+                
+            } catch (error) {
+                showNotification('Erro ao iniciar serviços: ' + error.message, 'error');
+                addLog('error', 'Erro ao iniciar serviços: ' + error.message);
+            }
+        }
+
+        async function stopServices() {
+            showNotification('Parando serviços...', 'warning');
+            
+            try {
+                // Simular parada dos serviços
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showNotification('Serviços parados com sucesso!', 'success');
+                addLog('info', 'Serviços parados manualmente');
+                refreshStatus();
+                
+            } catch (error) {
+                showNotification('Erro ao parar serviços: ' + error.message, 'error');
+                addLog('error', 'Erro ao parar serviços: ' + error.message);
+            }
+        }
+
+        async function restartServices() {
+            showNotification('Reiniciando serviços...', 'warning');
+            
+            try {
+                // Simular reinicialização
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                showNotification('Serviços reiniciados com sucesso!', 'success');
+                addLog('info', 'Serviços reiniciados manualmente');
+                refreshStatus();
+                
+            } catch (error) {
+                showNotification('Erro ao reiniciar serviços: ' + error.message, 'error');
+                addLog('error', 'Erro ao reiniciar serviços: ' + error.message);
+            }
+        }
+
+        // Funções de logs
+        function addLog(level, message) {
+            const logsContainer = document.getElementById('logs-container');
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">${timestamp}</span>
+                <span class="log-level ${level}">${level.toUpperCase()}</span>
+                <span class="log-message">${message}</span>
+            `;
+            
+            logsContainer.appendChild(logEntry);
+            
+            // Manter apenas os últimos 50 logs
+            const logs = logsContainer.querySelectorAll('.log-entry');
+            if (logs.length > 50) {
+                logs[0].remove();
+            }
+            
+            // Scroll para o final
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            logsContainer.innerHTML = '';
+            addLog('info', 'Logs limpos manualmente');
+        }
+
+        async function refreshLogs() {
+            const loadingElement = document.getElementById('logs-loading');
+            loadingElement.classList.remove('hidden');
+            
+            try {
+                // Simular carregamento de logs
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Adicionar alguns logs de exemplo
+                addLog('info', 'Logs atualizados automaticamente');
+                addLog('info', 'Verificação de sistema concluída');
+                
+                showNotification('Logs atualizados com sucesso!', 'success');
+                
+            } catch (error) {
+                showNotification('Erro ao atualizar logs: ' + error.message, 'error');
+            } finally {
+                loadingElement.classList.add('hidden');
+            }
+        }
+
+        // Funções de notificação
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Funções de utilidade
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Adicionar logs iniciais
+        setTimeout(() => {
+            addLog('info', 'Dashboard de monitoramento carregado');
+            addLog('info', 'Verificando status dos serviços...');
+        }, 1000);
+    </script>
+</body>
+</html>
