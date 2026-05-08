@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import express from "express";
-import { createServer as createViteServer } from "vite";
-import path from "path";
-import Database from "better-sqlite3";
+import express from 'express';
+import cors from 'cors';
+import { Database } from 'better-sqlite3';
+import path from 'path';
 import { fileURLToPath } from "url";
-import cors from "cors";
 import crypto from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -939,23 +938,26 @@ async function startServer() {
   });
 
   // --- Vite Middleware ---
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running at http://localhost:${PORT}`);
   });
 }
 
-startServer();
+// API server for mobile app synchronization
+const mobileApp = express();
+const mobilePort = process.env.PORT || 3002;
+
+// Middleware
+mobileApp.use(cors());
+mobileApp.use(express.json());
+
+// ... (mobile API routes and logic)
+
+// Start mobile API server
+mobileApp.listen(mobilePort, () => {
+  console.log(`🚀 EDI IA Mobile API Server running on port ${mobilePort}`);
+  console.log(`📱 Mobile endpoints available at http://localhost:${mobilePort}/api/mobile`);
+  console.log(`🔗 Health check: http://localhost:${mobilePort}/api/mobile/health`);
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
