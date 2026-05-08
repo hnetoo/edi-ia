@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand: #D4AF37;
+  --color-brand-muted: rgba(212, 175, 55, 0.1);
+  --color-brand-glow: rgba(212, 175, 55, 0.2);
+  --color-surface-dark: #0A0B10;
+  --color-surface: #15161C;
+  --color-surface-lighter: #1E2129;
+  --color-ink: #F5F2ED;
+  --color-ink-muted: #94A3B8;
+}
+
+@layer base {
+  body {
+    @apply bg-surface-dark text-ink font-sans antialiased selection:bg-brand selection:text-black;
+  }
+}
+
+.tech-grid {
+  background-image: 
+    linear-gradient(to right, rgba(212, 175, 55, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.gold-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+              linear-gradient(135deg, #FFD700, #B8860B, #FFD700) border-box;
+}
+
+.gold-text-gradient {
+  background: linear-gradient(135deg, #FFF5C3 0%, #D4AF37 50%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass-card {
+  @apply bg-surface/40 backdrop-blur-3xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl;
+}
+
+.brand-glow {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+.gold-glow-bg {
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+}
+
+.brand-border-glow {
+  @apply border-brand/30 shadow-[0_0_15px_rgba(0,217,126,0.1)];
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
